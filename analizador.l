@@ -26,11 +26,13 @@ Identif \$([a-z]|[A-Z])+
 MuchosCero 0(0)+
 digCero [0-9]
 digUno [1-9]
-digSiete [0-7]
+digSieteCero [0-7]
+digSieteUno [1-7]
 ConstantesNumEnt 0|({digUno}({digCero})*)
-ConstantesNumOct (o|O){digSiete}+
+ConstantesNumOct (o|O)0|(o|O)({digSieteUno}({digSieteCero})*)
 ConstantesNum {ConstantesNumEnt}|{ConstantesNumOct}
-ConstantesReal (0|({digUno}({digCero})+))*\.([0-9])+
+ConstantesRealDec 0|{digCero}*{digUno}
+ConstantesReal {ConstantesNumEnt}\.{ConstantesRealDec}
 ConstantesCad (\"[^(\"|'|^.)]([^(\"|'|^.)])+\")|('([^('|^.)])')|(\"'\")
 SimbolosEsp \[|\]|\(|\)|\{|\}|,|:|;
 OperadoresArit \+|\-|\*|\/|%|\\|\^
