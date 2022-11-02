@@ -90,7 +90,6 @@ struct Lista *tokensList;
 // Contadores para llevar la 'cuenta' de la posicion en la tabla
 int contTokens = -1;
 int contIdent = -1;
-int contEnteros = -1;
 int contReales = -1;
 int contCadenas = -1;
 
@@ -168,13 +167,9 @@ FinDeLinea " "+|\n
 }
 {ConstantesNum} {
   contTokens++;
-  contEnteros++;
-  // Se añade a la tabla de identificadores
-  struct Nodo *tempTabla = crearNuevoNodo(contEnteros,2,yytext);
-  agregarALista(enterosList,tempTabla);
   // Se añade a la tabla de tokens
   char* posStr = parseInttoString(contEnteros);
-  struct Nodo *tempToken = crearNuevoNodo(contTokens,2,posStr);
+  struct Nodo *tempToken = crearNuevoNodo(contTokens,2,yytext);
   agregarALista(tokensList,tempToken);
 }
 {ConstantesReal} {
@@ -243,7 +238,6 @@ int yywrap(){return(1);}
 int main(){
   // Se inicializan las variables de las tablas
   identificadoresList = crearLista();
-  enterosList = crearLista(); 
   realesList = crearLista();
   cadenasList = crearLista();
   tokensList = crearLista();
