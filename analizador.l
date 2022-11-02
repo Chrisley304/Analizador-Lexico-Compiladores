@@ -76,6 +76,24 @@ char palabrasReservadas[][LONGITUD_MAXIMA_CADENAS] = {"alternative","big","evalu
 // 7 Operadores relacionales.
 char operadoresRelacionales[][LONGITUD_MAXIMA_CADENAS] = {"<",">","<=",">=","==","!="};
 
+// Tablas:
+struct Lista *identificadoresList;
+// 2 -> Constantes numéricas enteras. 
+struct Lista *enterosList;
+// 3 -> Constantes numéricas reales. 
+struct Lista *realesList;
+// 4 -> Constantes cadenas.
+struct Lista *cadenasList;
+// Tabla de tokens
+struct Lista *tokensList;
+
+// Contadores para llevar la 'cuenta' de la posicion en la tabla
+int contTokens = -1;
+int contIdent = -1;
+int contEnteros = -1;
+int contReales = -1;
+int contCadenas = -1;
+
 // Para obtener la posicion del catalogo de palabras reservadas 
 int buscaReservada(char* busqueda){
   for(int i = 0; i< 17; i++){
@@ -85,6 +103,14 @@ int buscaReservada(char* busqueda){
   }
   return -1;
 }
+// Parser de int a string
+char* parseInttoString(int numero){
+  int length = snprintf( NULL, 0, "%d", numero );
+  char* numStr = malloc( length + 1 );
+  snprintf( numStr, length + 1, "%d", numero );
+  return numStr; 
+}
+
 
 %}
 
@@ -103,8 +129,8 @@ ConstantesNumOct (o|O)0|(o|O)({digSieteUno}({digSieteCero})*)
 ConstantesNum {ConstantesNumEnt}|{ConstantesNumOct}
 ConstantesRealDec 0|{digCero}*{digUno}
 ConstantesReal {ConstantesNumEnt}\.{ConstantesRealDec}
-ConstantesCad (\"[^(\"|'|^.)]([^(\"|'|^.)])+\")|('([^('|^.)])')|(\"'\")
-SimbolosEsp \[|\]|\(|\)|\{|\}|,|:|;
+ConstantesCad \"[^"'\n]([^"'\n])+\"|'[^'\n]'|\"'\"
+SimbolosEsp [(){},:;]|\[|\]
 OperadoresArit \+|\-|\*|\/|%|\\|\^
 OperadoresRela1 <=|>=|==|!=
 OperadoresRela2 <|>
@@ -114,10 +140,23 @@ FinDeLinea " "+|^.
 %%
 {PalabraReservada}	{
   int pos = buscaReservada(yytext);
-  printf("%s esta en la posicion %d\n", yytext,pos);
+  contTokens++;
+  // Parse de int a str para la struct
+  char* posStr = parseInttoString(pos);
+  struct Nodo *temp = crearNuevoNodo(contTokens,0,posStr);
+  agregarALista(tokensList,temp);
 }
 {Identif}	{
-  printf("Soy un identificador: %s\n", yytext);
+  contTokens++;
+  contIdent++;
+  // Se añade a la tabla de identificadores
+  struct Nodo *tempTabla = crearNuevoNodo(contIdent,1,yytext);
+  agregarALista(identificadoresList,tempTabla);
+  // Se añade a la tabla de tokens
+  char* posStr = parseInttoString(contIdent);
+  struct Nodo *tempToken = crearNuevoNodo(contTokens,1,posStr);
+  agregarALista(tokensList,tempToken);
+  // printf("El ultimo de la linked list de Tokens es %d: %d | %s",tokensList->tail->posicion,tokensList->tail->clase,tokensList->tail->valor);
 }
 {MuchosCero} {
   printf("Soy un error (Más de un 0 al inicio): %s\n", yytext);
@@ -152,20 +191,18 @@ FinDeLinea " "+|^.
 . {
   printf("");
 }
+
 %%
 int yywrap(){return(1);}
 
 int main(){
-  // 1 -> Identificadores.
-  struct Lista *identificadoresList = crearLista();
-  // 2 -> Constantes numéricas enteras. 
-  struct Lista *enterosList = crearLista();
-  // 3 -> Constantes numéricas reales. 
-  struct Lista *realesList = crearLista();
-  // 4 -> Constantes cadenas.
-  struct Lista *cadenasList = crearLista();
-  // Tabla de tokens
-  struct Lista *tokensList = crearLista();
+  // Se inicializan las variables de las tablas
+  identificadoresList = crearLista();
+  enterosList = crearLista(); 
+  realesList = crearLista();
+  cadenasList = crearLista();
+  tokensList = crearLista();
+  // Se comienza a ejecutar lex
 	yylex();
 	return 0;
 }
