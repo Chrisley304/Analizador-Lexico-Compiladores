@@ -139,7 +139,7 @@ OperadoresArit \+|\-|\*|\/|%|\\|\^
 OperadoresRela1 <=|>=|==|!=
 OperadoresRela2 <|>
 OperadoresAsig =
-FinDeLinea " "+|\n
+FinDeLinea " "+|\n|\t
 
 %%
 {PalabraReservada}	{
