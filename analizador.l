@@ -235,13 +235,24 @@ FinDeLinea " "+|\n|\t
 %%
 int yywrap(){return(1);}
 
-int main(){
+int main(int argc, char *argv[]){
   // Se inicializan las variables de las tablas
   identificadoresList = crearLista();
   realesList = crearLista();
   cadenasList = crearLista();
   tokensList = crearLista();
-  // Se comienza a ejecutar lex
-	yylex();
-	return 0;
+ 
+  // Si se especifica un archivo de entrada
+  if(argc > 1){
+    // Se indica que se leera dicho archivo
+    yyin = fopen(argv[1],"r");
+    // Se ejecuta lex
+    yylex();
+    // Se cierra el flujo del archivo
+    fclose(yyin);
+  }else{
+    // La entrada sera por teclado
+    yylex();
+  }
+  return 0;
 }
