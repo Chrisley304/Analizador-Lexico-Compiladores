@@ -24,6 +24,7 @@ const int LONGITUD_MAXIMA_CADENAS = 20;
 struct Nodo{
   int posicion;
   int clase;
+  int tipo;
   char *valor;
   struct Nodo *sig;
 };
@@ -59,7 +60,28 @@ void agregarALista(struct Lista *lista, struct Nodo *nuevo)
   lista->tail = nuevo;
 }
 
-struct Nodo *crearNuevoNodo(int posicion,int clase, char valor[])
+struct Nodo *crearNuevoNodoSimbolo(int posicion, char valor[], int tipo)
+{
+  struct Nodo *nuevoNodo = NULL;
+  nuevoNodo = malloc(sizeof(struct Nodo));
+  nuevoNodo->sig = NULL;
+  nuevoNodo->posicion = posicion;
+  nuevoNodo->tipo = tipo;
+  nuevoNodo->valor = strdup(valor);
+  return nuevoNodo;
+}
+
+struct Nodo *crearNuevoNodoLiteral(int posicion, char valor[])
+{
+  struct Nodo *nuevoNodo = NULL;
+  nuevoNodo = malloc(sizeof(struct Nodo));
+  nuevoNodo->sig = NULL;
+  nuevoNodo->posicion = posicion;
+  nuevoNodo->valor = strdup(valor);
+  return nuevoNodo;
+}
+
+struct Nodo *crearNuevoNodoToken(int posicion,int clase, char valor[])
 {
   struct Nodo *nuevoNodo = NULL;
   nuevoNodo = malloc(sizeof(struct Nodo));
@@ -147,18 +169,18 @@ FinDeLinea " "+|\n|\t
   contTokens++;
   // Parse de int a str para la struct
   char *posStr = parseInttoString(pos);
-  struct Nodo *temp = crearNuevoNodo(contTokens,0, posStr);
+  struct Nodo *temp = crearNuevoNodoToken(contTokens,0, posStr);
   agregarALista(tokensList,temp);
 }
 {Identif}	{
   contTokens++;
   contIdent++;
   // Se añade a la tabla de identificadores
-  struct Nodo *tempTabla = crearNuevoNodo(contIdent,1,yytext);
+  struct Nodo *tempTabla = crearNuevoNodoSimbolo(contIdent,yytext,-1);
   agregarALista(identificadoresList,tempTabla);
   // Se añade a la tabla de tokens
   char* posStr = parseInttoString(contIdent);
-  struct Nodo *tempToken = crearNuevoNodo(contTokens,1,posStr);
+  struct Nodo *tempToken = crearNuevoNodoToken(contTokens,1,posStr);
   agregarALista(tokensList,tempToken);
 }
 {CerosInicio} {
@@ -167,39 +189,39 @@ FinDeLinea " "+|\n|\t
 {ConstantesNum} {
   contTokens++;
   // Se añade a la tabla de tokens
-  struct Nodo *tempToken = crearNuevoNodo(contTokens,2,yytext);
+  struct Nodo *tempToken = crearNuevoNodoToken(contTokens,2,yytext);
   agregarALista(tokensList,tempToken);
 }
 {ConstantesReal} {
   contTokens++;
   contReales++;
   // Se añade a la tabla de identificadores
-  struct Nodo *tempTabla = crearNuevoNodo(contReales,3,yytext);
+  struct Nodo *tempTabla = crearNuevoNodoLiteral(contReales,yytext);
   agregarALista(realesList,tempTabla);
   // Se añade a la tabla de tokens
   char* posStr = parseInttoString(contReales);
-  struct Nodo *tempToken = crearNuevoNodo(contTokens,3,posStr);
+  struct Nodo *tempToken = crearNuevoNodoToken(contTokens,3,posStr);
   agregarALista(tokensList,tempToken);
 }
 {ConstantesCad} {
   contTokens++;
   contCadenas++;
   // Se añade a la tabla de identificadores
-  struct Nodo *tempTabla = crearNuevoNodo(contCadenas,4,yytext);
+  struct Nodo *tempTabla = crearNuevoNodoLiteral(contCadenas,yytext);
   agregarALista(cadenasList,tempTabla);
   // Se añade a la tabla de tokens
   char* posStr = parseInttoString(contCadenas);
-  struct Nodo *tempToken = crearNuevoNodo(contTokens,4,posStr);
+  struct Nodo *tempToken = crearNuevoNodoToken(contTokens,4,posStr);
   agregarALista(tokensList,tempToken);
 }
 {SimbolosEsp} {
   contTokens++;
-  struct Nodo *tempToken = crearNuevoNodo(contTokens,5,yytext);
+  struct Nodo *tempToken = crearNuevoNodoToken(contTokens,5,yytext);
   agregarALista(tokensList,tempToken);
 }
 {OperadoresArit} {
   contTokens++;
-  struct Nodo *tempToken = crearNuevoNodo(contTokens,6,yytext);
+  struct Nodo *tempToken = crearNuevoNodoToken(contTokens,6,yytext);
   agregarALista(tokensList,tempToken);
 }
 {OperadoresRela1} {
@@ -207,7 +229,7 @@ FinDeLinea " "+|\n|\t
   contTokens++;
   // Parse de int a str para la struct
   char* posStr = parseInttoString(pos);
-  struct Nodo *temp = crearNuevoNodo(contTokens,7,posStr);
+  struct Nodo *temp = crearNuevoNodoToken(contTokens,7,posStr);
   agregarALista(tokensList,temp);
 }
 {OperadoresRela2} {
@@ -215,12 +237,12 @@ FinDeLinea " "+|\n|\t
   contTokens++;
   // Parse de int a str para la struct
   char* posStr = parseInttoString(pos);
-  struct Nodo *temp = crearNuevoNodo(contTokens,7,posStr);
+  struct Nodo *temp = crearNuevoNodoToken(contTokens,7,posStr);
   agregarALista(tokensList,temp);
 }
 {OperadoresAsig} {
   contTokens++;
-  struct Nodo *tempToken = crearNuevoNodo(contTokens,8,yytext);
+  struct Nodo *tempToken = crearNuevoNodoToken(contTokens,8,yytext);
   agregarALista(tokensList,tempToken);
 }
 {FinDeLinea} {
@@ -237,11 +259,11 @@ void obtenerArchivoSalidaTXT(){
   archSal = fopen("salida.txt","w");
   struct Nodo *q;
   // Tabla de identificadores
-  fprintf(archSal,"=== Tabla de identificadores ===\nPosición: Valor\n");
+  fprintf(archSal,"=== Tabla de identificadores ===\nPosición: Valor | Tipo\n");
   q=identificadoresList->head;
   while(q!=NULL)
   {
-    fprintf(archSal,"%d: %s\n",q->posicion,q->valor);
+    fprintf(archSal,"%d: %s | %d\n",q->posicion,q->valor,q->tipo);
     q=q->sig;
   }
   fprintf(archSal,"\n");
@@ -277,11 +299,11 @@ void obtenerArchivoSalidaTXT(){
 void mostrarSalida(){
   struct Nodo *q;
   // Tabla de identificadores
-  printf("=== Tabla de identificadores ===\nPosición: Valor\n");
+  printf("=== Tabla de identificadores ===\nPosición: Valor | Tipo\n");
   q=identificadoresList->head;
   while(q!=NULL)
   {
-    printf("%d: %s\n",q->posicion,q->valor);
+    printf("%d: %s | %d\n",q->posicion,q->valor,q->tipo);
     q=q->sig;
   }
   // Tabla de constantes reales
@@ -315,11 +337,11 @@ void obtenerArchivoSalidaCSV(){
   archSal = fopen("salida.csv","w");
   struct Nodo *q;
   // Tabla de identificadores
-  fprintf(archSal,",Tabla de identificadores,\nPosición,Valor,\n");
+  fprintf(archSal,",Tabla de identificadores,\nPosición,Valor,Tipo\n");
   q=identificadoresList->head;
   while(q!=NULL)
   {
-    fprintf(archSal,"%d,%s,\n",q->posicion,q->valor);
+    fprintf(archSal,"%d,%s,%d\n",q->posicion,q->valor,q->tipo);
     q=q->sig;
   }
   fprintf(archSal,"\n");
