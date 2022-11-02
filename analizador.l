@@ -162,7 +162,15 @@ FinDeLinea " "+|^.
   printf("Soy un error (Más de un 0 al inicio): %s\n", yytext);
 }
 {ConstantesNum} {
-  printf("Soy un numero entero: %s\n", yytext);
+  contTokens++;
+  contEnteros++;
+  // Se añade a la tabla de identificadores
+  struct Nodo *tempTabla = crearNuevoNodo(contEnteros,2,yytext);
+  agregarALista(identificadoresList,tempTabla);
+  // Se añade a la tabla de tokens
+  char* posStr = parseInttoString(contEnteros);
+  struct Nodo *tempToken = crearNuevoNodo(contTokens,2,posStr);
+  agregarALista(tokensList,tempToken);
 }
 {ConstantesReal} {
   printf("Soy un numero real: %s\n", yytext);
