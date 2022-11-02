@@ -16,7 +16,7 @@
 
 // Variables Globales/ Constantes
 FILE *archSal; // Archivo de salida
-const int LONGITUD_MAXIMA_CADENAS = 50;
+const int LONGITUD_MAXIMA_CADENAS = 20;
 
 // Estructuras necesarias para las tablas:
 
@@ -50,11 +50,11 @@ void agregarALista(struct Lista *lista, struct Nodo *nuevo)
   // Si la lista esta vacia:
   if (lista->head == NULL)
   {
-      lista->head = nuevo;
+    lista->head = nuevo;
   }
   else
   {
-      lista->tail->sig = nuevo;
+    lista->tail->sig = nuevo;
   }
   lista->tail = nuevo;
 }
@@ -70,21 +70,21 @@ struct Nodo *crearNuevoNodo(int posicion,int clase, char *valor)
   return nuevoNodo;
 }
 
-// Tablas & Catalogos
+// Catalogos
 // 0 -> Palabras reservadas
 char palabrasReservadas[][LONGITUD_MAXIMA_CADENAS] = {"alternative","big","evaluate","instead","large","loop","make","number","other","real","repeat","select","small","step","stop","symbol","throw"};
-// 1 -> Identificadores.
-Lista *identificadoresList = crearLista();
-// 2 -> Constantes numéricas enteras. 
-Lista *enterosList = crearLista();
-// 3 -> Constantes numéricas reales. 
-Lista *realesList = crearLista();
-// 4 -> Constantes cadenas.
-Lista *cadenasList = crearLista();
 // 7 Operadores relacionales.
 char operadoresRelacionales[][LONGITUD_MAXIMA_CADENAS] = {"<",">","<=",">=","==","!="};
-// Tabla de tokens
-Lista *tokensList = crearLista();
+
+// Para obtener la posicion del catalogo de palabras reservadas 
+int buscaReservada(char* busqueda){
+  for(int i = 0; i< 17; i++){
+    if(strcmp(busqueda, palabrasReservadas[i]) == 0){
+      return i;
+    }
+  }
+  return -1;
+}
 
 %}
 
@@ -113,7 +113,8 @@ FinDeLinea " "+|^.
 
 %%
 {PalabraReservada}	{
-  printf("Soy una palabra reservada: %s\n", yytext);
+  int pos = buscaReservada(yytext);
+  printf("%s esta en la posicion %d\n", yytext,pos);
 }
 {Identif}	{
   printf("Soy un identificador: %s\n", yytext);
@@ -155,6 +156,16 @@ FinDeLinea " "+|^.
 int yywrap(){return(1);}
 
 int main(){
+  // 1 -> Identificadores.
+  struct Lista *identificadoresList = crearLista();
+  // 2 -> Constantes numéricas enteras. 
+  struct Lista *enterosList = crearLista();
+  // 3 -> Constantes numéricas reales. 
+  struct Lista *realesList = crearLista();
+  // 4 -> Constantes cadenas.
+  struct Lista *cadenasList = crearLista();
+  // Tabla de tokens
+  struct Lista *tokensList = crearLista();
 	yylex();
 	return 0;
 }
