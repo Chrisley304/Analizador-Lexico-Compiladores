@@ -2,3 +2,4 @@ DS_STORE
 .vscode
 lex.yy.c
 *.out
+pruebas*
