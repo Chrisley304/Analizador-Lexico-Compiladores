@@ -1,13 +1,12 @@
 %{
 /*
-  Analizador sintáctico en lex para
+  Analizador léxico en lex para
   el lenguaje descrito en clase.
   
   Integrantes:
     - Núñez Quintana Luis Axel 
-	    Hecho por Axel -> Ax
-	- Leyva Mercado Christian Alejandro
-	    Hecho por Christian -> 
+    - Leyva Mercado Christian Alejandro
+  Fecha de elaboración: 01 de noviembre del 2022
 */
 
 // Bibliotecas/Headers
@@ -15,8 +14,8 @@
 #include <stdlib.h>
 
 // Variables Globales/ Constantes
+#define LONGITUD_MAXIMA_CADENAS 20
 FILE *archSal; // Archivo de salida
-const int LONGITUD_MAXIMA_CADENAS = 20;
 
 // Estructuras necesarias para las tablas:
 
@@ -100,8 +99,6 @@ char operadoresRelacionales[][LONGITUD_MAXIMA_CADENAS] = {"<",">","<=",">=","=="
 
 // Tablas:
 struct Lista *identificadoresList;
-// 2 -> Constantes numéricas enteras. 
-struct Lista *enterosList;
 // 3 -> Constantes numéricas reales. 
 struct Lista *realesList;
 // 4 -> Constantes cadenas.
@@ -141,6 +138,7 @@ char* parseInttoString(int numero){
   return numStr; 
 }
 
+// Para buscar cadenas en listas ligadas
 int buscaLista(char* busqueda, struct Lista *lista){
   struct Nodo *q;
   q = lista->head;
@@ -155,7 +153,7 @@ int buscaLista(char* busqueda, struct Lista *lista){
 }
 
 %}
-
+/*Expresiones regulares, si esta capitalizado el nombre tiene una acción asignada, de otra maanera es auxiliar*/
 PalabraReservada alternative|big|evaluate|instead|large|loop|make|number|other|real|repeat|select|small|step|stop|symbol|throw
 Identif \$([a-z]|[A-Z])+
 digCero [0-9]
@@ -177,7 +175,8 @@ OperadoresAsig =
 FinDeLinea " "+|\n|\t
 
 %%
-{PalabraReservada}	{
+  /*Acciones para expresiones regulares de clase, espacios o errores*/
+{PalabraReservada}  {
   int pos = buscaReservada(yytext);
   contTokens++;
   // Parse de int a str para la struct
@@ -185,7 +184,7 @@ FinDeLinea " "+|\n|\t
   struct Nodo *temp = crearNuevoNodoToken(contTokens,0, posStr);
   agregarALista(tokensList,temp);
 }
-{Identif}	{
+{Identif} {
   contTokens++;
 
   int posicionIdent = buscaLista(yytext,identificadoresList);
@@ -203,7 +202,7 @@ FinDeLinea " "+|\n|\t
   agregarALista(tokensList,tempToken);
 }
 {CerosInicio} {
-  printf("Soy un error (0 antes de numero): %s\n", yytext);
+  printf("Error: %s\n", yytext);
 }
 {ConstantesNum} {
   contTokens++;
@@ -268,12 +267,13 @@ FinDeLinea " "+|\n|\t
   printf("");
 }
 . {
-  printf("Soy un error: %s\n", yytext);
+  printf("Error: %s\n", yytext);
 }
 
 %%
 int yywrap(){return(1);}
 
+// Función para crear archivo de salida con extensión .txt
 void obtenerArchivoSalidaTXT(){
   archSal = fopen("salida.txt","w");
   struct Nodo *q;
@@ -315,6 +315,7 @@ void obtenerArchivoSalidaTXT(){
   fclose(archSal);
 }
 
+// Función para mostrar la salida en consola
 void mostrarSalida(){
   struct Nodo *q;
   // Tabla de identificadores
@@ -352,6 +353,7 @@ void mostrarSalida(){
 
 }
 
+// Función para crear archivo de salida con extensión .csv
 void obtenerArchivoSalidaCSV(){
   archSal = fopen("salida.csv","w");
   struct Nodo *q;
@@ -407,11 +409,13 @@ int main(int argc, char *argv[]){
     yyin = fopen(argv[1],"r");
     // Se ejecuta lex
     yylex();
+    // Se cierra el flujo del archivo
     fclose(yyin);
-    // Se genera el archivo de salida
+    // Se generan los archivos de salida
     obtenerArchivoSalidaCSV();
     obtenerArchivoSalidaTXT();
-    // Se cierra el flujo del archivo
+    // Se muestra la salida del programa
+    mostrarSalida();
   }else{
     // La entrada sera por teclado
     yylex();
