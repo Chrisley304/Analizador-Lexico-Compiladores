@@ -27,9 +27,9 @@ digSieteCero [0-7]
 digSieteUno [1-7]
 constantesNumEnt 0|({digUno}({digCero})*)
 constantesNumOct (o|O)0|(o|O)({digSieteUno}({digSieteCero})*)
-ConstantesNum {ConstantesNumEnt}|{ConstantesNumOct}
+ConstantesNum {constantesNumEnt}|{constantesNumOct}
 constantesRealDec 0|{digCero}*{digUno}
-ConstantesReal {ConstantesNumEnt}\.{ConstantesRealDec}
+ConstantesReal {constantesNumEnt}\.{constantesRealDec}
 ConstantesCad \"[^"'\n]([^"'\n])+\"|'[^'\n]'|\"'\"
 SimbolosEsp [(){},:;]|\[|\]
 OperadoresArit \+|\-|\*|\/|%|\\|\^
@@ -75,7 +75,7 @@ FinDeLinea " "+|\n
 {FinDeLinea} {
   printf("");
 }
-[^ \n]+  {
+. {
   printf("Soy un error: %s\n", yytext);
 }
 %%
