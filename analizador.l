@@ -21,44 +21,52 @@ const int LONGITUD_MAXIMA_CADENAS = 50;
 // Estructuras necesarias para las tablas:
 
 // Para las linked lists
-typedef struct{
+struct Nodo{
+  int posicion;
   int clase;
-  char valor[LONGITUD_MAXIMA_CADENAS];
-  Nodo *sig;
-}Nodo;
+  char *valor;
+  struct Nodo *sig;
+};
 
-typedef struct{
-  struct Nodo *head,*tail;
-}Lista;
+struct Lista{
+  struct Nodo *head, *tail;
+};
 
-Lista* crearLista(){
-  Lista *lista;
-  lista=(Lista*)malloc(sizeof(Lista));
-  if(lista==NULL)
+struct Lista *crearLista()
+{
+  struct Lista *lista;
+  lista = (struct Lista *)malloc(sizeof(struct Lista));
+  if (lista == NULL)
   {
-    printf("No se pudo reservar lista\n");
+      printf("No se pudo reservar lista\n");
   }
-  lista->h=NULL;
-  lista->t=NULL;
+  lista->head = NULL;
+  lista->tail = NULL;
   return lista;
 }
 
-void agregarALista(Lista *lista, Nodo *nuevo){
+void agregarALista(struct Lista *lista, struct Nodo *nuevo)
+{
   // Si la lista esta vacia:
-  if(*lista.h == NULL){
-    lista->h = nuevo;
-  }else{
-    lista->t->sig = nuevo;
+  if (lista->head == NULL)
+  {
+      lista->head = nuevo;
   }
-  lista->t=nuevo;
+  else
+  {
+      lista->tail->sig = nuevo;
+  }
+  lista->tail = nuevo;
 }
 
-Nodo *crearNuevoNodo(int clase, char* valor){
-  Nodo *nuevoNodo = NULL;
-  nuevoNodo = malloc(sizeof(Nodo));
+struct Nodo *crearNuevoNodo(int posicion,int clase, char *valor)
+{
+  struct Nodo *nuevoNodo = NULL;
+  nuevoNodo = malloc(sizeof(struct Nodo));
   nuevoNodo->sig = NULL;
-  nuevoNodo.clase = clase;
-  nuevoNodo.valor = valor;
+  nuevoNodo->posicion = posicion;
+  nuevoNodo->clase = clase;
+  nuevoNodo->valor = valor;
   return nuevoNodo;
 }
 
