@@ -141,6 +141,19 @@ char* parseInttoString(int numero){
   return numStr; 
 }
 
+int buscaLista(char* busqueda, struct Lista *lista){
+  struct Nodo *q;
+  q = lista->head;
+  while(q!=NULL)
+  {
+    if(strcmp(busqueda, q->valor) == 0){
+      return q->posicion;
+    }
+    q=q->sig;
+  }
+  return -1;
+}
+
 %}
 
 PalabraReservada alternative|big|evaluate|instead|large|loop|make|number|other|real|repeat|select|small|step|stop|symbol|throw
@@ -174,12 +187,18 @@ FinDeLinea " "+|\n|\t
 }
 {Identif}	{
   contTokens++;
-  contIdent++;
-  // Se añade a la tabla de identificadores
-  struct Nodo *tempTabla = crearNuevoNodoSimbolo(contIdent,yytext,-1);
-  agregarALista(identificadoresList,tempTabla);
+
+  int posicionIdent = buscaLista(yytext,identificadoresList);
+  if (posicionIdent == -1){
+    contIdent++;
+    posicionIdent = contIdent;
+    // Se añade a la tabla de identificadores
+    struct Nodo *tempTabla = crearNuevoNodoSimbolo(posicionIdent,yytext,-1);
+    agregarALista(identificadoresList,tempTabla);
+  }
+  
   // Se añade a la tabla de tokens
-  char* posStr = parseInttoString(contIdent);
+  char* posStr = parseInttoString(posicionIdent);
   struct Nodo *tempToken = crearNuevoNodoToken(contTokens,1,posStr);
   agregarALista(tokensList,tempToken);
 }
@@ -382,7 +401,6 @@ int main(int argc, char *argv[]){
   realesList = crearLista();
   cadenasList = crearLista();
   tokensList = crearLista();
-
   // Si se especifica un archivo de entrada
   if(argc > 1){
     // Se indica que se leera dicho archivo
