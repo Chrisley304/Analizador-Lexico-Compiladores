@@ -103,6 +103,15 @@ int buscaReservada(char* busqueda){
   }
   return -1;
 }
+// Para obtener la posicion del catalogo de operadores aritmeticos 
+int buscaOperador(char* busqueda){
+  for(int i = 0; i< 6; i++){
+    if(strcmp(busqueda, operadoresRelacionales[i]) == 0){
+      return i;
+    }
+  }
+  return -1;
+}
 // Parser de int a string
 char* parseInttoString(int numero){
   int length = snprintf( NULL, 0, "%d", numero );
@@ -110,7 +119,6 @@ char* parseInttoString(int numero){
   snprintf( numStr, length + 1, "%d", numero );
   return numStr; 
 }
-
 
 %}
 
@@ -166,32 +174,64 @@ FinDeLinea " "+|^.
   contEnteros++;
   // Se añade a la tabla de identificadores
   struct Nodo *tempTabla = crearNuevoNodo(contEnteros,2,yytext);
-  agregarALista(identificadoresList,tempTabla);
+  agregarALista(enterosList,tempTabla);
   // Se añade a la tabla de tokens
   char* posStr = parseInttoString(contEnteros);
   struct Nodo *tempToken = crearNuevoNodo(contTokens,2,posStr);
   agregarALista(tokensList,tempToken);
 }
 {ConstantesReal} {
-  printf("Soy un numero real: %s\n", yytext);
+  contTokens++;
+  contReales++;
+  // Se añade a la tabla de identificadores
+  struct Nodo *tempTabla = crearNuevoNodo(contReales,3,yytext);
+  agregarALista(realesList,tempTabla);
+  // Se añade a la tabla de tokens
+  char* posStr = parseInttoString(contReales);
+  struct Nodo *tempToken = crearNuevoNodo(contTokens,3,posStr);
+  agregarALista(tokensList,tempToken);
 }
 {ConstantesCad} {
-  printf("Soy una cadena: %s\n", yytext);
+  contTokens++;
+  contCadenas++;
+  // Se añade a la tabla de identificadores
+  struct Nodo *tempTabla = crearNuevoNodo(contCadenas,4,yytext);
+  agregarALista(cadenasList,tempTabla);
+  // Se añade a la tabla de tokens
+  char* posStr = parseInttoString(contCadenas);
+  struct Nodo *tempToken = crearNuevoNodo(contTokens,4,posStr);
+  agregarALista(tokensList,tempToken);
 }
 {SimbolosEsp} {
-  printf("Soy un simbolo especial: %s\n", yytext);
+  contTokens++;
+  struct Nodo *tempToken = crearNuevoNodo(contTokens,5,yytext);
+  agregarALista(tokensList,tempToken);
 }
 {OperadoresArit} {
-  printf("Soy un operador aritmetico: %s\n", yytext);
+  contTokens++;
+  struct Nodo *tempToken = crearNuevoNodo(contTokens,6,yytext);
+  agregarALista(tokensList,tempToken);
 }
 {OperadoresRela1} {
-  printf("Soy un operador relacional de dos caracteres: %s\n", yytext);
+  int pos = buscaOperador(yytext);
+  contTokens++;
+  // Parse de int a str para la struct
+  char* posStr = parseInttoString(pos);
+  struct Nodo *temp = crearNuevoNodo(contTokens,7,posStr);
+  agregarALista(tokensList,temp);
 }
 {OperadoresRela2} {
-  printf("Soy un operador relacional de un caracter: %s\n", yytext);
+  int pos = buscaOperador(yytext);
+  contTokens++;
+  // Parse de int a str para la struct
+  char* posStr = parseInttoString(pos);
+  struct Nodo *temp = crearNuevoNodo(contTokens,7,posStr);
+  agregarALista(tokensList,temp);
 }
 {OperadoresAsig} {
-  printf("Soy un operador de asignacion: %s\n", yytext);
+  contTokens++;
+  struct Nodo *tempToken = crearNuevoNodo(contTokens,8,yytext);
+  agregarALista(tokensList,tempToken);
 }
 {FinDeLinea} {
   printf("");
