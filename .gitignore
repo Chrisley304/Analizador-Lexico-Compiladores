@@ -3,3 +3,4 @@ DS_STORE
 lex.yy.c
 *.out
 pruebas*
+salida.*

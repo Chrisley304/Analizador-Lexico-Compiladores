@@ -59,14 +59,14 @@ void agregarALista(struct Lista *lista, struct Nodo *nuevo)
   lista->tail = nuevo;
 }
 
-struct Nodo *crearNuevoNodo(int posicion,int clase, char *valor)
+struct Nodo *crearNuevoNodo(int posicion,int clase, char valor[])
 {
   struct Nodo *nuevoNodo = NULL;
   nuevoNodo = malloc(sizeof(struct Nodo));
   nuevoNodo->sig = NULL;
   nuevoNodo->posicion = posicion;
   nuevoNodo->clase = clase;
-  nuevoNodo->valor = valor;
+  nuevoNodo->valor = strdup(valor);
   return nuevoNodo;
 }
 
@@ -146,8 +146,8 @@ FinDeLinea " "+|\n|\t
   int pos = buscaReservada(yytext);
   contTokens++;
   // Parse de int a str para la struct
-  char* posStr = parseInttoString(pos);
-  struct Nodo *temp = crearNuevoNodo(contTokens,0,posStr);
+  char *posStr = parseInttoString(pos);
+  struct Nodo *temp = crearNuevoNodo(contTokens,0, posStr);
   agregarALista(tokensList,temp);
 }
 {Identif}	{
@@ -160,7 +160,6 @@ FinDeLinea " "+|\n|\t
   char* posStr = parseInttoString(contIdent);
   struct Nodo *tempToken = crearNuevoNodo(contTokens,1,posStr);
   agregarALista(tokensList,tempToken);
-  // printf("El ultimo de la linked list de Tokens es %d: %d | %s",tokensList->tail->posicion,tokensList->tail->clase,tokensList->tail->valor);
 }
 {CerosInicio} {
   printf("Soy un error (0 antes de numero): %s\n", yytext);
@@ -168,7 +167,6 @@ FinDeLinea " "+|\n|\t
 {ConstantesNum} {
   contTokens++;
   // Se añade a la tabla de tokens
-  char* posStr = parseInttoString(contEnteros);
   struct Nodo *tempToken = crearNuevoNodo(contTokens,2,yytext);
   agregarALista(tokensList,tempToken);
 }
@@ -235,24 +233,149 @@ FinDeLinea " "+|\n|\t
 %%
 int yywrap(){return(1);}
 
+void obtenerArchivoSalidaTXT(){
+  archSal = fopen("salida.txt","w");
+  struct Nodo *q;
+  // Tabla de identificadores
+  fprintf(archSal,"=== Tabla de identificadores ===\nPosición: Valor\n");
+  q=identificadoresList->head;
+  while(q!=NULL)
+  {
+    fprintf(archSal,"%d: %s\n",q->posicion,q->valor);
+    q=q->sig;
+  }
+  fprintf(archSal,"\n");
+  // Tabla de constantes reales
+  fprintf(archSal,"=== Tabla de constantes reales ===\nPosición: Valor\n");
+  q=realesList->head;
+  while(q!=NULL)
+  {
+    fprintf(archSal,"%d: %s\n",q->posicion,q->valor);
+    q=q->sig;
+  }
+  // Tabla de constantes cadenas
+  fprintf(archSal,"=== Tabla de constantes cadenas ===\nPosición: Valor\n");
+  q=cadenasList->head;
+  while(q!=NULL)
+  {
+    fprintf(archSal,"%d: %s\n",q->posicion,q->valor);
+    q=q->sig;
+  }
+  // Tabla de tokens
+  fprintf(archSal,"=== Tabla de tokens ===\nPosición: Clase | Valor\n");
+  q=tokensList->head;
+  while(q!=NULL)
+  {
+    fprintf(archSal,"%d: %d | %s\n",q->posicion,q->clase,q->valor);
+    q=q->sig;
+  }
+
+  fprintf(archSal,"\n\n");
+  fclose(archSal);
+}
+
+void mostrarSalida(){
+  struct Nodo *q;
+  // Tabla de identificadores
+  printf("=== Tabla de identificadores ===\nPosición: Valor\n");
+  q=identificadoresList->head;
+  while(q!=NULL)
+  {
+    printf("%d: %s\n",q->posicion,q->valor);
+    q=q->sig;
+  }
+  // Tabla de constantes reales
+  printf("=== Tabla de constantes reales ===\nPosición: Valor\n");
+  q=realesList->head;
+  while(q!=NULL)
+  {
+    printf("%d: %s\n",q->posicion,q->valor);
+    q=q->sig;
+  }
+  // Tabla de constantes cadenas
+  printf("=== Tabla de constantes cadenas ===\nPosición: Valor\n");
+  q=cadenasList->head;
+  while(q!=NULL)
+  {
+    printf("%d: %s\n",q->posicion,q->valor);
+    q=q->sig;
+  }
+  // Tabla de tokens
+  printf("=== Tabla de tokens ===\nPosición: Clase | Valor\n");
+  q=tokensList->head;
+  while(q!=NULL)
+  {
+    printf("%d: %d | %s\n",q->posicion,q->clase,q->valor);
+    q=q->sig;
+  }
+
+}
+
+void obtenerArchivoSalidaCSV(){
+  archSal = fopen("salida.csv","w");
+  struct Nodo *q;
+  // Tabla de identificadores
+  fprintf(archSal,",Tabla de identificadores,\nPosición,Valor,\n");
+  q=identificadoresList->head;
+  while(q!=NULL)
+  {
+    fprintf(archSal,"%d,%s,\n",q->posicion,q->valor);
+    q=q->sig;
+  }
+  fprintf(archSal,"\n");
+  // Tabla de constantes reales
+  fprintf(archSal,",Tabla de constantes reales,\nPosición,Valor,\n");
+  q=realesList->head;
+  while(q!=NULL)
+  {
+    fprintf(archSal,"%d,%s,\n",q->posicion,q->valor);
+    q=q->sig;
+  }
+  fprintf(archSal,"\n");
+  // Tabla de constantes cadenas
+  fprintf(archSal,",Tabla de constantes cadenas,\nPosición,Valor,\n");
+  q=cadenasList->head;
+  while(q!=NULL)
+  {
+    fprintf(archSal,"%d,%s,\n",q->posicion,q->valor);
+    q=q->sig;
+  }
+  fprintf(archSal,"\n");
+  // Tabla de tokens
+  fprintf(archSal,",Tabla de tokens,\nPosición,Clase,Valor\n");
+  q=tokensList->head;
+  while(q!=NULL)
+  {
+    fprintf(archSal,"%d,%d,%s\n",q->posicion,q->clase,q->valor);
+    q=q->sig;
+  }
+
+  fprintf(archSal,"\n\n");
+  fclose(archSal);
+}
+
 int main(int argc, char *argv[]){
   // Se inicializan las variables de las tablas
   identificadoresList = crearLista();
   realesList = crearLista();
   cadenasList = crearLista();
   tokensList = crearLista();
- 
+
   // Si se especifica un archivo de entrada
   if(argc > 1){
     // Se indica que se leera dicho archivo
     yyin = fopen(argv[1],"r");
     // Se ejecuta lex
     yylex();
-    // Se cierra el flujo del archivo
     fclose(yyin);
+    // Se genera el archivo de salida
+    obtenerArchivoSalidaCSV();
+    obtenerArchivoSalidaTXT();
+    // Se cierra el flujo del archivo
   }else{
     // La entrada sera por teclado
     yylex();
   }
+  // mostrarSalida();
   return 0;
 }
