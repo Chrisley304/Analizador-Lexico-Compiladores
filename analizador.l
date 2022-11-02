@@ -122,20 +122,17 @@ char* parseInttoString(int numero){
 
 %}
 
-reserv1 alternative|big|evaluate|instead|large|loop
-reserv2 make|number|other|real|repeat|select|small
-reserv3 step|stop|symbol|throw
-PalabraReservada {reserv1}|{reserv2}|{reserv3}
+PalabraReservada alternative|big|evaluate|instead|large|loop|make|number|other|real|repeat|select|small|step|stop|symbol|throw
 Identif \$([a-z]|[A-Z])+
-MuchosCero 0(0)+
 digCero [0-9]
+CerosInicio 0{digCero}+
 digUno [1-9]
 digSieteCero [0-7]
 digSieteUno [1-7]
-ConstantesNumEnt 0|({digUno}({digCero})*)
-ConstantesNumOct (o|O)0|(o|O)({digSieteUno}({digSieteCero})*)
+constantesNumEnt 0|({digUno}({digCero})*)
+constantesNumOct (o|O)0|(o|O)({digSieteUno}({digSieteCero})*)
 ConstantesNum {ConstantesNumEnt}|{ConstantesNumOct}
-ConstantesRealDec 0|{digCero}*{digUno}
+constantesRealDec 0|{digCero}*{digUno}
 ConstantesReal {ConstantesNumEnt}\.{ConstantesRealDec}
 ConstantesCad \"[^"'\n]([^"'\n])+\"|'[^'\n]'|\"'\"
 SimbolosEsp [(){},:;]|\[|\]
@@ -143,7 +140,7 @@ OperadoresArit \+|\-|\*|\/|%|\\|\^
 OperadoresRela1 <=|>=|==|!=
 OperadoresRela2 <|>
 OperadoresAsig =
-FinDeLinea " "+|^.
+FinDeLinea " "+|\n
 
 %%
 {PalabraReservada}	{
@@ -166,8 +163,8 @@ FinDeLinea " "+|^.
   agregarALista(tokensList,tempToken);
   // printf("El ultimo de la linked list de Tokens es %d: %d | %s",tokensList->tail->posicion,tokensList->tail->clase,tokensList->tail->valor);
 }
-{MuchosCero} {
-  printf("Soy un error (Más de un 0 al inicio): %s\n", yytext);
+{CerosInicio} {
+  printf("Soy un error (0 antes de numero): %s\n", yytext);
 }
 {ConstantesNum} {
   contTokens++;
@@ -236,8 +233,8 @@ FinDeLinea " "+|^.
 {FinDeLinea} {
   printf("");
 }
-. {
-  printf("");
+[^ \n]+  {
+  printf("Soy un error: %s\n", yytext);
 }
 
 %%
